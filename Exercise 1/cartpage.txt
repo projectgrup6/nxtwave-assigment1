@@ -1,0 +1,13 @@
+from selenium.webdriver.common.by import By
+from pages.base_page import BasePage
+
+class CartPage(BasePage):
+    CART_ITEM_NAME = (By.CSS_SELECTOR, ".cart_item .inventory_item_name")
+    
+    def verify_product_in_cart(self, product_name):
+        try:
+            cart_product_name = self.wait_for_element(*self.CART_ITEM_NAME).text
+            return cart_product_name == product_name
+        except Exception as e:
+            print(f"Error verifying product in cart: {str(e)}")
+            return False

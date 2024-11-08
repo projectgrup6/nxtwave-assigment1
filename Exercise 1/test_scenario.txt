@@ -1,0 +1,59 @@
+import unittest
+from selenium import webdriver
+from pages.login_page import LoginPage
+from pages.products_page import ProductsPage
+from pages.cart_page import CartPage
+import time
+
+class TestSaucedemo(unittest.TestCase):
+
+    def setUp(self):
+        """Setup method to initialize the WebDriver and open the page."""
+        self.driver = webdriver.Edge(executable_path=r"C:\Users\goddumar\Downloads\edgedriver_win32\msedgedriver.exe")
+        self.driver.get("https://www.saucedemo.com/")
+        self.driver.maximize_window()
+
+    def tearDown(self):
+        """Teardown method to close the WebDriver."""
+        if self.driver:
+            self.driver.quit()
+
+    def test_scenario(self):
+        """Main test scenario."""
+        try:
+            # Step 1: Login
+            login_page = LoginPage(self.driver)
+            login_page.login("standard_user", "secret_sauce")
+
+            # Step 2: Verify successful login and navigate to Products page
+            products_page = ProductsPage(self.driver)
+            self.assertTrue(self.driver.current_url.endswith("/inventory.html"), "Login failed or did not land on products page")
+
+            # Step 3: Get first product name and price, store in a text file
+            product_name, product_price = products_page.get_first_product_details()
+            if product_name and product_price:
+                with open("product_info.txt", "w") as file:
+                    file.write(f"Product Name: {product_name}\n")
+                    file.write(f"Product Price: {product_price}\n")
+            
+            # Step 4: Add the first product to cart
+            products_page.add_first_product_to_cart()
+
+            # Step 5: Navigate to Cart page and verify the product is there
+            cart_page = CartPage(self.driver)
+            self.driver.get("https://www.saucedemo.com/cart.html")
+            self.assertTrue(cart_page.verify_product_in_cart(product_name), "Product not found in cart")
+
+            # Step 6: Logout
+            self.driver.get("https://www.saucedemo.com/")
+            self.driver.find_element(By.ID, "react-burger-menu-btn").click()  # Open menu
+            self.driver.find_element(By.ID, "logout_sidebar_link").click()  # Click Logout
+            time.sleep(2)  # Wait for logout to complete
+            self.assertTrue(self.driver.current_url.endswith("/index.html"), "Logout failed")
+
+        except Exception as e:
+            print(f"Test failed due to error: {str(e)}")
+            self.fail(f"Test failed due to error: {str(e)}")
+
+if __name__ == "__main__":
+    unittest.main()

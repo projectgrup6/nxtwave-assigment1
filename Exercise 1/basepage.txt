@@ -1,0 +1,31 @@
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+class BasePage:
+    def __init__(self, driver):
+        self.driver = driver
+    
+    def wait_for_element(self, by, value, timeout=10):
+        try:
+            return WebDriverWait(self.driver, timeout).until(
+                EC.presence_of_element_located((by, value))
+            )
+        except Exception as e:
+            print(f"Error while waiting for element {value}: {str(e)}")
+            return None
+
+    def click_element(self, by, value):
+        element = self.wait_for_element(by, value)
+        if element:
+            element.click()
+        else:
+            print(f"Could not click on element {value}")
+    
+    def send_keys(self, by, value, text):
+        element = self.wait_for_element(by, value)
+        if element:
+            element.clear()
+            element.send_keys(text)
+        else:
+            print(f"Could not send text to element {value}")

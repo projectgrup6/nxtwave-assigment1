@@ -1,0 +1,19 @@
+from selenium.webdriver.common.by import By
+from pages.base_page import BasePage
+
+class ProductsPage(BasePage):
+    FIRST_PRODUCT_NAME = (By.CSS_SELECTOR, ".inventory_item_name")
+    FIRST_PRODUCT_PRICE = (By.CSS_SELECTOR, ".inventory_item_price")
+    ADD_TO_CART_BUTTON = (By.CSS_SELECTOR, ".btn_inventory")
+    
+    def get_first_product_details(self):
+        try:
+            product_name = self.wait_for_element(*self.FIRST_PRODUCT_NAME).text
+            product_price = self.wait_for_element(*self.FIRST_PRODUCT_PRICE).text
+            return product_name, product_price
+        except Exception as e:
+            print(f"Error getting product details: {str(e)}")
+            return None, None
+
+    def add_first_product_to_cart(self):
+        self.click_element(*self.ADD_TO_CART_BUTTON)
